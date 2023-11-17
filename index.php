@@ -34,13 +34,13 @@ class Jeux{
         }
     }
     static public function choixHero(){
-        self::$personnage = self::$ListePersonnages[array_rand(self::$ListePersonnages)];
+        self::$personnage = self::$ListePersonnages[array_rand(self::$ListePersonnages)];       //Le choix du héros se fait aléatoirement entre tout les héro dans la liste des personnages incarnables
         echo "Vous incarnez ". self::$personnage->name ."<br>";
     }
     
-    static private function rencontre($ennemi){
-        while($ennemi->billes > 0 && self::$personnage->billes > 0){
-            if(self::$personnage->combats($ennemi)){
+    static private function rencontre($ennemi){                         //la méthode rencontre prend un argument, l'ennemi que doit combattre le héro. 
+        while($ennemi->billes > 0 && self::$personnage->billes > 0){    //tant que l'ennemi et le héro ont des billes, je lance la méthode combat de la class Hero
+            if(self::$personnage->combats($ennemi)){                    //si cette méthode retourne true (donc si le héro gagne) alors je retire l'ennemi vaincu de la liste d'ennemi a vaincre
                 unset(self::$ListeEnnemi[array_search($ennemi, self::$ListeEnnemi)]);
             }
         }
@@ -60,7 +60,7 @@ class Jeux{
         
         while (self::$personnage->billes > 0 && count(self::$ListeEnnemi) > 0) {        //tant que le héro possède des billes et qu'il y a des ennemis a vaincres, je lance un match entre le héro et un ennemi aléatoire
             self::rencontre(self::$ListeEnnemi[array_rand(self::$ListeEnnemi)]);
-        }
+        }                                                                               // SI il n'y a plus d'ennemi a vaincre, alors le héro remporte le jeux
         if (count(self::$ListeEnnemi)== 0) {
             echo " Bravo, vous remportez le squid game !";
         }
@@ -72,17 +72,17 @@ class Personnage{
     public $billes;
     public $name;
 
-    public function getBilles(){
-        return $this->billes;
-    }
-    public function getName(){
-        return $this->name;
-    }
 }
 
 class Hero extends Personnage{
     private $pari;
-    private function GetPari(){
+    public function __construct($name, $billes, $bonus, $malus){
+        $this->name = $name;
+        $this->billes = $billes;
+        $this->bonus = $bonus;
+        $this->malus = $malus;
+    }
+    private function GetPari(){         //fonction pour afficher sous forme de string le pari qui est sous forme de int (0 ou 1)
         if($this->pari == 0){
             return "Pair";
         }
@@ -91,32 +91,26 @@ class Hero extends Personnage{
         }
     }
 
-    public function __construct($name, $billes, $bonus, $malus){
-        $this->name = $name;
-        $this->billes = $billes;
-        $this->bonus = $bonus;
-        $this->malus = $malus;
-    }
-    public function combats($ennemi){
-        echo "vous avez $this->billes billes et l'adversaire $ennemi->billes<br>";
+    public function combats($ennemi){       //fonction gérant une rencontre entre un ennemi et le héro.
+        echo "vous avez $this->billes billes et l'adversaire $ennemi->billes<br>";          //j'affiche les billes des 2 opposants
 
-        $ennemi->ChoixBilles();
+        $ennemi->ChoixBilles();             //J 'effectue les choix nécessaire (nb de billes en jeu et pari)
         $this->choixPari();
 
-        echo "l'ennemi avait misé $ennemi->choixBilles billes <br>";
+        echo "l'ennemi avait misé $ennemi->choixBilles billes <br>";    //les choix étant fait, j'affiche la réponse du nb de billes
 
-        if($this->checkPari($ennemi)){
+        if($this->checkPari($ennemi)){              //Si le pari est le bon, je fait gagner au héro le nb de billes en jeu + son bonus et fait passer le nb de billes de l'ennemi a 0, puis retourne True
             $this->billes += $ennemi->choixBilles + $this->bonus;
             $ennemi->billes = 0;
             echo " Victoire ! Vous gagnez $ennemi->choixBilles + $this->bonus billes et l'ennemi est éliminé<br>";
             return true;
         }
-        else{
+        else{                                       //Si le pari n'est pas le bon, le héro perd le nb de billes en jeu + son malus, l'ennemi gagne le nb de billes en jeu
             $this->billes -= ($ennemi->choixBilles + $this->malus);
             $ennemi->billes += $ennemi->choixBilles;
             echo " Défaite !";
         }
-        if($this->billes < 0){
+        if($this->billes < 0){                      // J'affiche le nb de billes restantes au héro
             echo " Vous n'avez plus de billes";
         }
         else{
@@ -125,9 +119,8 @@ class Hero extends Personnage{
         
     }
     
-    public function choixPari(){
+    public function choixPari(){        //le choix du pari est fait de manière aléatoire entre 0 et 1 (pair ou impair). J'affiche ensuite le pari fait
         $this->pari = Utiles::generateRandom(0,1);
-
         echo "Vous avez parié " . $this->GetPari() . "<br>";
     }
     private function checkPari($ennemi){
@@ -146,11 +139,10 @@ class Ennemi extends Personnage{
         $this->billes = $billes;
         $this->age = $age;
     }
-    public function ChoixBilles(){
+    public function ChoixBilles(){          //choisi un nb de billes a mettre en jeu aléatoire entre 1 et le nb de billes posséder
         $this->choixBilles = Utiles::generateRandom(1,$this->billes);
     }
 }
-
 
 
 echo Jeux::jouer();
