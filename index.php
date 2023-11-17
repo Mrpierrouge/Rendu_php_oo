@@ -94,7 +94,20 @@ class Hero extends Personnage{
     public function combats($ennemi){       //fonction gérant une rencontre entre un ennemi et le héro.
         echo "vous avez $this->billes billes et l'adversaire $ennemi->billes<br>";          //j'affiche les billes des 2 opposants
 
-        $ennemi->ChoixBilles();             //J 'effectue les choix nécessaire (nb de billes en jeu et pari)
+        $ennemi->ChoixBilles();             //J 'effectue les choix nécessaire (nb de billes en jeu, tricher ou non et pari)
+
+        if ($ennemi->age > 70) {
+            echo "L'ennemi est plutot agé...";
+            if ($this->choixTriche()) {         //Si l'ennemi a 70 ans et que le héro décide de tricher, je fait gagner au héro le nb de billes en jeu et fait passer le nb de billes de l'ennemi a 0, puis retourne True
+                $this->billes += $ennemi->choixBilles;
+                $ennemi->billes = 0;
+                echo " Vous décidez de tricher et remportez $ennemi->choixBilles billes. L'ennemi est éliminé... <br>";
+                return true;
+            }
+            else {
+                echo "mais vous décidez de ne pas tricher <br>";
+            }
+        }
         $this->choixPari();
 
         echo "l'ennemi avait misé $ennemi->choixBilles billes <br>";    //les choix étant fait, j'affiche la réponse du nb de billes
@@ -118,7 +131,11 @@ class Hero extends Personnage{
         }
         
     }
-    
+    public function choixTriche(){
+        if (Utiles::generateRandom(0,1) == 1) {     //1 chance sur 2 de tricher
+            return true;
+        }
+    }
     public function choixPari(){        //le choix du pari est fait de manière aléatoire entre 0 et 1 (pair ou impair). J'affiche ensuite le pari fait
         $this->pari = Utiles::generateRandom(0,1);
         echo "Vous avez parié " . $this->GetPari() . "<br>";
